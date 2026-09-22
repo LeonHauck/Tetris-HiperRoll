@@ -1,0 +1,4 @@
+# Bloqueia qualquer acesso direto a essa pasta pelo navegador.
+# É aqui que fica o arquivo com nome/telefone/pontuação de quem jogou —
+# só o score.php e o leaderboard.php podem ler/escrever nele.
+Require all denied

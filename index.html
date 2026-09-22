@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HiperTris - HiperRoll</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="start-screen" class="screen">
+  <img src="assets/logo.png" alt="HiperRoll" class="logo">
+  <h1>HiperTris</h1>
+  <p class="subtitle">O Tetris oficial da HiperRoll</p>
+
+  <div class="name-entry">
+    <label for="player-name">Seu nome</label>
+    <input type="text" id="player-name" maxlength="20" placeholder="Digite seu nome" autocomplete="off">
+    <div id="phone-field">
+      <label for="player-phone">Seu telefone</label>
+      <input type="tel" id="player-phone" maxlength="16" placeholder="(00) 00000-0000" autocomplete="off" inputmode="numeric">
+    </div>
+    <div id="name-error" class="error-msg hidden">Digite seu nome para jogar!</div>
+  </div>
+
+  <button id="start-btn" class="btn">JOGAR</button>
+  <button id="mute-btn-start" class="btn btn-secondary btn-small">Som: Ligado</button>
+
+  <div class="leaderboard-box">
+    <h3>Ranking</h3>
+    <ol id="leaderboard-list" class="leaderboard-list"></ol>
+  </div>
+
+  <div class="controls-help">
+    <h3>Controles</h3>
+    <ul>
+      <li><b>&larr; &rarr;</b> Mover</li>
+      <li><b>&uarr; / X</b> Girar</li>
+      <li><b>Z</b> Girar (anti-horário)</li>
+      <li><b>&darr;</b> Descida suave</li>
+      <li><b>Espaço</b> Descida instantânea</li>
+      <li><b>C</b> Guardar peça</li>
+      <li><b>P</b> Pausar</li>
+    </ul>
+  </div>
+</div>
+
+<div id="game-screen" class="screen hidden">
+  <header class="topbar">
+    <img src="assets/logo.png" alt="HiperRoll" class="logo-small">
+    <div class="title-block">
+      <h1 class="title-small">HiperTris</h1>
+      <div id="player-name-display" class="player-name-display"></div>
+    </div>
+    <button id="mute-btn" class="btn-icon" title="Ligar/desligar som">Som: Ligado</button>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-panel left">
+      <div class="panel-box">
+        <h3>Guardada</h3>
+        <canvas id="hold-canvas" width="100" height="100"></canvas>
+      </div>
+      <div class="panel-box stats">
+        <h3>Pontos</h3>
+        <div id="score" class="stat-value">0</div>
+        <h3>Nível</h3>
+        <div id="level" class="stat-value">1</div>
+        <h3>Linhas</h3>
+        <div id="lines" class="stat-value">0</div>
+        <h3>Recorde</h3>
+        <div id="highscore" class="stat-value">0</div>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board-canvas" width="320" height="640"></canvas>
+      <div id="pause-overlay" class="overlay hidden">
+        <div id="pause-main-box" class="overlay-box">
+          <h2>PAUSADO</h2>
+          <p>Pressione P para continuar</p>
+          <button id="pause-restart-btn" class="btn btn-small">Reiniciar</button>
+          <button id="pause-ranking-btn" class="btn btn-secondary btn-small">Ver Ranking</button>
+        </div>
+        <div id="pause-ranking-box" class="overlay-box hidden">
+          <h2>Ranking</h2>
+          <ol id="pause-leaderboard-list" class="leaderboard-list"></ol>
+          <button id="pause-ranking-close-btn" class="btn btn-secondary btn-small">Voltar</button>
+        </div>
+      </div>
+      <div id="gameover-overlay" class="overlay hidden">
+        <div class="overlay-box">
+          <h2>FIM DE JOGO</h2>
+          <p>Pontuação: <span id="final-score">0</span></p>
+          <p id="rank-msg" class="rank-msg hidden"></p>
+          <p id="new-record" class="new-record hidden">NOVO RECORDE!</p>
+          <button id="restart-btn" class="btn">JOGAR NOVAMENTE</button>
+          <button id="menu-btn" class="btn btn-secondary">MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-panel right">
+      <div class="panel-box">
+        <h3>Próxima</h3>
+        <canvas id="next-canvas" width="100" height="100"></canvas>
+      </div>
+      <div class="panel-box next-list-box">
+        <canvas id="next-canvas-2" width="80" height="60"></canvas>
+        <canvas id="next-canvas-3" width="80" height="60"></canvas>
+      </div>
+      <button id="pause-btn" class="btn btn-small">Pausar</button>
+    </div>
+  </div>
+
+  <div class="mobile-controls">
+    <button id="mc-left" class="mc-btn">&larr;</button>
+    <button id="mc-rotate" class="mc-btn">&uarr;</button>
+    <button id="mc-right" class="mc-btn">&rarr;</button>
+    <button id="mc-down" class="mc-btn">&darr;</button>
+    <button id="mc-drop" class="mc-btn">DROP</button>
+    <button id="mc-hold" class="mc-btn">HOLD</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  Desenvolvido por <a href="https://www.linkedin.com/in/leon-hauck/" target="_blank" rel="noopener noreferrer">Leon Hauck</a>
+</footer>
+
+<script src="config.js"></script>
+<script src="leaderboard.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

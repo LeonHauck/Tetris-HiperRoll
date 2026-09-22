@@ -1,0 +1,15 @@
+# Dependências e build do Electron
+node_modules/
+dist/
+build/
+.build-tools/
+
+# Dados coletados nos eventos (nome/telefone/pontuação) — não é pra ir pro GitHub
+api/data/*.json
+/data/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/

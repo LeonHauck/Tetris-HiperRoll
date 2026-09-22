@@ -1,0 +1,5 @@
+# Impede que o arquivo de dados seja aberto direto pelo navegador
+# (ele tem telefone de quem jogou, não pode ficar público).
+<FilesMatch "\.(json)$">
+  Require all denied
+</FilesMatch>

@@ -1,0 +1,43 @@
+{
+  "name": "hipertris",
+  "version": "1.0.0",
+  "description": "HiperTris - o Tetris oficial da HiperRoll",
+  "main": "electron/main.js",
+  "author": "Leon Hauck",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --dir",
+    "dist:instalador": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.hiperroll.hipertris",
+    "productName": "HiperTris",
+    "files": [
+      "index.html",
+      "style.css",
+      "game.js",
+      "config.js",
+      "leaderboard.js",
+      "assets/**/*",
+      "icone/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icone/hipertris.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

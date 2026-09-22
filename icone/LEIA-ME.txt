@@ -1,0 +1,14 @@
+hipertris.ico
+==============
+
+Ícone oficial do HiperTris em .ico (com os tamanhos 16, 32, 48, 64, 128
+e 256 px dentro do mesmo arquivo — o Windows escolhe o tamanho certo
+sozinho conforme o uso).
+
+Pra que serve:
+- Ícone do instalador/.exe gerado pelo Electron (já configurado em
+  package.json e electron/main.js, não precisa mexer em nada).
+- Colar num atalho na área de trabalho do PC do evento: clique direito
+  no atalho > Propriedades > Alterar Ícone... > selecione este arquivo.
+- Fixar na barra de tarefas com uma cara bonita, sem ficar com o ícone
+  genérico do Electron.
