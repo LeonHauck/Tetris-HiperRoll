@@ -2,7 +2,7 @@
 
 <img src="assets/logo.png" alt="HiperRoll" width="220">
 
-# HiperTris
+# 🧱 HiperTris
 
 ### O Tetris oficial da HiperRoll — feito pra brilhar em estande de evento
 
@@ -19,7 +19,7 @@ uma trilha sonora que não enche o saco depois de 2 horas de estande ligado,
 e ainda de quebra guardando o contato de quem jogou. Feito pra evento,
 sem frescura, sem instalar nada — abre e joga.
 
-## O que tem dentro
+## 🎮 O que tem dentro
 
 - **Tetris raiz**: as 7 peças, fila de próximas peças, peça fantasma
   (mostra onde vai cair), guardar peça (hold), pontuação, níveis que
@@ -48,7 +48,7 @@ sem frescura, sem instalar nada — abre e joga.
      ideal pra evento onde o wi-fi é... digamos, "opcional". Salva tudo
      num arquivo local no PC.
 
-## Como jogar
+## 🕹️ Como jogar
 
 | Tecla | Ação |
 |---|---|
@@ -62,7 +62,7 @@ sem frescura, sem instalar nada — abre e joga.
 
 No celular tem botões na tela pra tudo isso.
 
-## Rodando local, rapidinho
+## ⚡ Rodando local, rapidinho
 
 Não precisa de nada instalado. Só abrir o `index.html` no navegador.
 
@@ -76,7 +76,7 @@ Nesse modo o ranking fica salvo só no navegador de cada pessoa
 (`localStorage`). Pra virar um ranking de verdade, compartilhado entre
 todo mundo, é preciso publicar com o back-end — próximo tópico.
 
-## Publicando com ranking compartilhado (HostGator ou qualquer host com PHP)
+## 🌐 Publicando com ranking compartilhado (HostGator ou qualquer host com PHP)
 
 Sem banco de dados — o PHP escreve num arquivo, do mesmo jeito que os
 outros joguinhos que você já hospedou lá.
@@ -104,7 +104,7 @@ telefone nem o resto ficam expostos publicamente. Esse arquivo não vai
 pro GitHub (já está no `.gitignore`), só é criado no servidor quando a
 primeira pessoa joga.
 
-## Gerando o `.exe` (versão offline pra evento sem internet)
+## 💻 Gerando o `.exe` (versão offline pra evento sem internet)
 
 O app desktop usa [Electron](https://www.electronjs.org/) — mesmo jogo,
 empacotado como programa Windows que não depende de internet nenhuma.
@@ -134,7 +134,7 @@ o `npm run dist` mesmo vai rodar liso, e ele já resolve o que precisa.
 
 O ícone do app já vem pronto em [`icone/hipertris.ico`](icone/hipertris.ico).
 
-## Estrutura do projeto
+## 📁 Estrutura do projeto
 
 ```
 Tetris-Hiperroll/
@@ -157,7 +157,7 @@ Tetris-Hiperroll/
 └── package.json                     scripts do Electron
 ```
 
-## Privacidade
+## 🔒 Privacidade
 
 O telefone só é pedido no app desktop (evento), nunca no site. Serve só
 pra quem organiza o evento usar depois (sorteio, contato comercial) —
