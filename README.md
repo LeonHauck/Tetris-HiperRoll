@@ -22,8 +22,16 @@ sem frescura, sem instalar nada — abre e joga.
 ## 🎮 O que tem dentro
 
 - **Tetris raiz**: as 7 peças, fila de próximas peças, peça fantasma
-  (mostra onde vai cair), guardar peça (hold), pontuação, níveis que
-  aumentam a velocidade e efeito de linha completa.
+  (mostra onde vai cair), guardar peça (hold), níveis que aumentam a
+  velocidade.
+- **Visual neon**: peças em tons vivos (cada tipo sorteia entre 2
+  variações neon, então tem mais cor no tabuleiro do que o Tetris
+  clássico), números da pontuação brilhando, e a linha completada pisca
+  em branco antes de sumir — com efeito sonoro de bônus junto.
+- **Pontuação com multiplicador**: a pontuação feita durante a partida é
+  multiplicada pela quantidade de linhas completadas no final (ex: 1000
+  pontos × 11 linhas = 11000) — recompensa quem realmente limpa linhas,
+  não só quem sobrevive.
 - **Cara da HiperRoll**: vermelho e azul da marca, logo em todo canto,
   responsivo de ponta a ponta — funciona igual bem num notebook, numa TV
   de estande ou no celular de quem tá passando.
@@ -34,9 +42,10 @@ sem frescura, sem instalar nada — abre e joga.
   (evento) também se pede o telefone, pra usar depois num sorteio, numa
   campanha, no que fizer sentido pro time de marketing — no site, só o
   nome mesmo.
-- **Ranking**: Top 10 de quem mais pontuou, visível na tela inicial e no
-  menu de pausa (com direito a reiniciar a partida sem sair do jogo).
-  O telefone (quando coletado) nunca aparece na tela — fica só guardado
+- **Ranking com pódio**: Top 10 de quem mais pontuou, visível na tela
+  inicial e no menu de pausa (com direito a reiniciar a partida sem sair
+  do jogo), com medalha de ouro, prata e bronze pros 3 primeiros. O
+  telefone (quando coletado) nunca aparece na tela — fica só guardado
   por trás.
 - **Funciona em três formatos**, mesmo código por trás dos três:
   1. Arquivo estático (abre o `index.html` e já era) — ranking só no

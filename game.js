@@ -6,15 +6,21 @@ const COLS = 10;
 const ROWS = 20;
 const CELL = 32;
 
-const COLORS = {
-  I: '#3DDCFF',
-  O: '#FFD23D',
-  T: '#B23DFF',
-  S: '#3DFF7A',
-  Z: '#ED1C2E', // vermelho HiperRoll
-  J: '#3D6BFF',
-  L: '#FF8A3D'
+// Cada tipo de peça tem 2 tons neon possíveis, sorteados a cada peça nova
+// (mais variedade visual sem mudar as 7 formas clássicas do Tetris).
+const COLOR_VARIANTS = {
+  I: ['#00F0FF', '#00B8FF'],
+  O: ['#FFEA00', '#FFC400'],
+  T: ['#D400FF', '#A600FF'],
+  S: ['#00FF66', '#39FF14'],
+  Z: ['#FF1744', '#FF0044'], // vermelho HiperRoll neon
+  J: ['#2979FF', '#1F5CFF'],
+  L: ['#FF9100', '#FF6D00']
 };
+// Cor "de referência" de cada tipo, usada nas prévias (próxima peça / guardada)
+const COLORS = Object.fromEntries(
+  Object.entries(COLOR_VARIANTS).map(([type, variants]) => [type, variants[0]])
+);
 
 // Shapes defined in a 4x4 (or smaller) grid, rotation 0
 const SHAPES = {
@@ -102,7 +108,8 @@ class Piece {
   constructor(type) {
     this.type = type;
     this.matrix = cloneMatrix(SHAPES[type]);
-    this.color = COLORS[type];
+    const variants = COLOR_VARIANTS[type];
+    this.color = variants[Math.floor(Math.random() * variants.length)];
     this.x = Math.floor((COLS - this.matrix.length) / 2);
     this.y = type === 'I' ? -1 : -2;
     if (type === 'O') this.y = -1;
@@ -140,6 +147,13 @@ class Board {
     piece.cells().forEach(({ x, y }) => {
       if (y >= 0) this.grid[y][x] = piece.color;
     });
+  }
+  getFullRows() {
+    const rows = [];
+    for (let r = 0; r < ROWS; r++) {
+      if (this.grid[r].every(cell => cell !== null)) rows.push(r);
+    }
+    return rows;
   }
   clearLines() {
     let cleared = 0;
@@ -205,8 +219,13 @@ class SoundManager {
   lock() { this.playTone(160, 0.08, 'triangle', 0.07); }
   hold() { this.playTone(300, 0.08, 'sine', 0.07); }
   lineClear(count) {
-    const base = 440;
-    for (let i = 0; i < count; i++) this.playTone(base + i * 130, 0.16, 'square', 0.11, i * 0.06);
+    // Arpejo ascendente "de bônus" + brilho no topo — quanto mais linhas, mais festa.
+    const arpeggio = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+    for (let i = 0; i < count; i++) {
+      this.playTone(arpeggio[Math.min(i, arpeggio.length - 1)], 0.16, 'square', 0.13, i * 0.06);
+    }
+    this.playTone(1567.98, 0.22, 'sine', 0.09, count * 0.06 + 0.04); // sparkle
+    if (count >= 4) this.playTone(2093.0, 0.26, 'sine', 0.1, count * 0.06 + 0.14); // bônus extra no Tetris
   }
   levelUp() { [523, 659, 784].forEach((f, i) => this.playTone(f, 0.13, 'square', 0.09, i * 0.09)); }
   gameOver() { [392, 330, 262, 196].forEach((f, i) => this.playTone(f, 0.28, 'triangle', 0.1, i * 0.18)); }
@@ -259,6 +278,7 @@ class Game {
     this.linesEl = document.getElementById('lines');
     this.highscoreEl = document.getElementById('highscore');
     this.finalScoreEl = document.getElementById('final-score');
+    this.scoreBreakdownEl = document.getElementById('score-breakdown');
     this.newRecordEl = document.getElementById('new-record');
 
     this.pauseOverlay = document.getElementById('pause-overlay');
@@ -305,10 +325,12 @@ class Game {
       listEl.appendChild(li);
       return;
     }
-    this.leaderboard.forEach(entry => {
+    const medals = ['🥇', '🥈', '🥉'];
+    this.leaderboard.forEach((entry, i) => {
       const li = document.createElement('li');
+      if (i < 3) li.classList.add(`rank-${i + 1}`);
       const nameSpan = document.createElement('span');
-      nameSpan.textContent = entry.name;
+      nameSpan.textContent = medals[i] ? `${medals[i]} ${entry.name}` : entry.name;
       const scoreSpan = document.createElement('span');
       scoreSpan.className = 'lb-score';
       scoreSpan.textContent = entry.score;
@@ -333,6 +355,8 @@ class Game {
     this.paused = false;
     this.gameOver = false;
     this.softDropping = false;
+    this.flashRows = null;
+    this.flashUntil = 0;
 
     this.scoreEl.textContent = '0';
     this.levelEl.textContent = '1';
@@ -341,6 +365,7 @@ class Game {
     this.gameoverOverlay.classList.add('hidden');
     this.newRecordEl.classList.add('hidden');
     this.rankMsgEl.classList.add('hidden');
+    this.scoreBreakdownEl.textContent = '';
   }
 
   bindInput() {
@@ -389,8 +414,14 @@ class Game {
     this.pauseMainBox.classList.remove('hidden');
   }
 
+  get isBusy() {
+    // "Busy" = não pode receber comando: pausado, fim de jogo, ou peça
+    // ainda brilhando antes de sumir da linha completada.
+    return this.paused || this.gameOver || !!this.flashRows;
+  }
+
   move(dx) {
-    if (this.paused || this.gameOver) return;
+    if (this.isBusy) return;
     if (this.board.isValid(this.current, dx, 0)) {
       this.current.x += dx;
       this.sound.move();
@@ -398,7 +429,7 @@ class Game {
   }
 
   softDrop() {
-    if (this.paused || this.gameOver) return;
+    if (this.isBusy) return;
     if (this.board.isValid(this.current, 0, 1)) {
       this.current.y += 1;
       this.score += 1;
@@ -411,7 +442,7 @@ class Game {
   }
 
   hardDrop() {
-    if (this.paused || this.gameOver) return;
+    if (this.isBusy) return;
     let dist = 0;
     while (this.board.isValid(this.current, 0, 1)) {
       this.current.y += 1;
@@ -424,7 +455,7 @@ class Game {
   }
 
   rotate(dir) {
-    if (this.paused || this.gameOver) return;
+    if (this.isBusy) return;
     const piece = this.current;
     if (piece.type === 'O') return;
     const original = piece.matrix;
@@ -444,7 +475,7 @@ class Game {
   }
 
   holdPiece() {
-    if (this.paused || this.gameOver || !this.canHold) return;
+    if (this.isBusy || !this.canHold) return;
     const currentType = this.current.type;
     if (this.hold === null) {
       this.hold = currentType;
@@ -463,20 +494,35 @@ class Game {
 
   lockPiece() {
     this.board.lock(this.current);
-    const cleared = this.board.clearLines();
-    if (cleared > 0) {
-      const points = [0, 100, 300, 500, 800][cleared] * this.level;
-      this.score += points;
-      this.lines += cleared;
-      const prevLevel = this.level;
-      this.level = Math.floor(this.lines / 10) + 1;
-      this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 80);
-      this.updateScore();
-      this.sound.lineClear(cleared);
-      if (this.level > prevLevel) this.sound.levelUp();
+    const fullRows = this.board.getFullRows();
+    if (fullRows.length > 0) {
+      // Segura a peça brilhando por um instante antes de sumir de verdade —
+      // a limpeza (pontos, próxima peça etc.) acontece em finalizeLineClear().
+      this.sound.lineClear(fullRows.length);
+      this.flashRows = fullRows;
+      this.flashUntil = performance.now() + 180 + fullRows.length * 25;
     } else {
       this.sound.lock();
+      this.current = new Piece(this.queue.next());
+      this.canHold = true;
+      if (!this.board.isValid(this.current, 0, 0)) {
+        this.triggerGameOver();
+      }
     }
+  }
+
+  finalizeLineClear() {
+    const cleared = this.board.clearLines();
+    const points = [0, 100, 300, 500, 800][cleared] * this.level;
+    this.score += points;
+    this.lines += cleared;
+    const prevLevel = this.level;
+    this.level = Math.floor(this.lines / 10) + 1;
+    this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 80);
+    this.updateScore();
+    if (this.level > prevLevel) this.sound.levelUp();
+
+    this.flashRows = null;
     this.current = new Piece(this.queue.next());
     this.canHold = true;
     if (!this.board.isValid(this.current, 0, 0)) {
@@ -507,13 +553,22 @@ class Game {
     this.gameOver = true;
     this.sound.stopMusic();
     this.sound.gameOver();
-    this.finalScoreEl.textContent = this.score;
+
+    // Pontuação final = pontos feitos x quantidade de linhas completadas.
+    const baseScore = this.score;
+    const finalScore = baseScore * this.lines;
+    this.score = finalScore;
+
+    this.finalScoreEl.textContent = finalScore;
+    this.scoreBreakdownEl.textContent = this.lines > 0
+      ? `${baseScore} pontos × ${this.lines} linha${this.lines === 1 ? '' : 's'} = ${finalScore}`
+      : `${baseScore} pontos x 0 linhas completadas = 0`;
     this.gameoverOverlay.classList.remove('hidden');
 
     this.leaderboardService.submit({
       name: this.playerName,
       phone: this.playerPhone,
-      score: this.score
+      score: finalScore
     }).then(result => {
       if (result.list) {
         this.leaderboard = result.list;
@@ -543,12 +598,26 @@ class Game {
 
   drawCell(ctx, x, y, color, size, alpha = 1) {
     ctx.globalAlpha = alpha;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 9;
     ctx.fillStyle = color;
     ctx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x * size + 1, y * size + 1, size - 2, size - 2);
     ctx.globalAlpha = 1;
+  }
+
+  // Brilho branco pulsante nas linhas completadas, antes de sumirem de vez.
+  drawFlashCell(ctx, x, y, time) {
+    const pulse = 0.65 + 0.35 * Math.sin(time / 40);
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = '#FFFFFF';
+    ctx.shadowBlur = 22;
+    ctx.fillStyle = `rgba(255,255,255,${pulse.toFixed(2)})`;
+    ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
+    ctx.shadowBlur = 0;
   }
 
   drawBoard() {
@@ -564,26 +633,33 @@ class Game {
       ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(COLS * CELL, y * CELL); ctx.stroke();
     }
 
-    // locked cells
+    // locked cells (linhas completadas piscam em branco antes de sumir)
+    const now = performance.now();
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         if (this.board.grid[r][c]) {
-          this.drawCell(ctx, c, r, this.board.grid[r][c], CELL);
+          if (this.flashRows && this.flashRows.includes(r)) {
+            this.drawFlashCell(ctx, c, r, now);
+          } else {
+            this.drawCell(ctx, c, r, this.board.grid[r][c], CELL);
+          }
         }
       }
     }
 
-    // ghost piece
-    const gy = this.ghostY();
-    this.current.cells().forEach(({ x, y }) => {
-      const dy = y + (gy - this.current.y);
-      if (dy >= 0) this.drawCell(ctx, x, dy, this.current.color, CELL, 0.2);
-    });
+    if (!this.flashRows) {
+      // ghost piece
+      const gy = this.ghostY();
+      this.current.cells().forEach(({ x, y }) => {
+        const dy = y + (gy - this.current.y);
+        if (dy >= 0) this.drawCell(ctx, x, dy, this.current.color, CELL, 0.2);
+      });
 
-    // current piece
-    this.current.cells().forEach(({ x, y }) => {
-      if (y >= 0) this.drawCell(ctx, x, y, this.current.color, CELL);
-    });
+      // current piece
+      this.current.cells().forEach(({ x, y }) => {
+        if (y >= 0) this.drawCell(ctx, x, y, this.current.color, CELL);
+      });
+    }
   }
 
   drawMini(ctx, type, canvas) {
@@ -610,9 +686,12 @@ class Game {
         if (mat[r][c]) {
           const x = offsetX + (c - minX) * size;
           const y = offsetY + (r - minY) * size;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 6;
           ctx.fillStyle = color;
           ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
-          ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
           ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
         }
       }
@@ -634,14 +713,18 @@ class Game {
     const delta = time - this.lastTime;
     this.lastTime = time;
     if (!this.paused) {
-      this.dropCounter += delta;
-      if (this.dropCounter > this.dropInterval) {
-        if (this.board.isValid(this.current, 0, 1)) {
-          this.current.y += 1;
-        } else {
-          this.lockPiece();
+      if (this.flashRows) {
+        if (time >= this.flashUntil) this.finalizeLineClear();
+      } else {
+        this.dropCounter += delta;
+        if (this.dropCounter > this.dropInterval) {
+          if (this.board.isValid(this.current, 0, 1)) {
+            this.current.y += 1;
+          } else {
+            this.lockPiece();
+          }
+          this.dropCounter = 0;
         }
-        this.dropCounter = 0;
       }
       this.drawBoard();
       this.drawSidebars();
