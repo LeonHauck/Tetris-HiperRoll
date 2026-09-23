@@ -374,10 +374,10 @@ class Game {
       if (document.getElementById('game-screen').classList.contains('hidden')) return;
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       switch (e.code) {
-        case 'ArrowLeft': this.move(-1); e.preventDefault(); break;
-        case 'ArrowRight': this.move(1); e.preventDefault(); break;
-        case 'ArrowDown': this.softDrop(); e.preventDefault(); break;
-        case 'ArrowUp': case 'KeyX': this.rotate(1); e.preventDefault(); break;
+        case 'ArrowLeft': case 'KeyA': this.move(-1); e.preventDefault(); break;
+        case 'ArrowRight': case 'KeyD': this.move(1); e.preventDefault(); break;
+        case 'ArrowDown': case 'KeyS': this.softDrop(); e.preventDefault(); break;
+        case 'ArrowUp': case 'KeyW': case 'KeyX': this.rotate(1); e.preventDefault(); break;
         case 'KeyZ': this.rotate(-1); e.preventDefault(); break;
         case 'Space': this.hardDrop(); e.preventDefault(); break;
         case 'KeyC': this.holdPiece(); e.preventDefault(); break;
@@ -555,14 +555,16 @@ class Game {
     this.sound.gameOver();
 
     // Pontuação final = pontos feitos x quantidade de linhas completadas.
+    // Sem nenhuma linha completada não faz sentido zerar quem já pontuou:
+    // nesse caso vale só a pontuação feita, sem multiplicar por zero.
     const baseScore = this.score;
-    const finalScore = baseScore * this.lines;
+    const finalScore = this.lines > 0 ? baseScore * this.lines : baseScore;
     this.score = finalScore;
 
     this.finalScoreEl.textContent = finalScore;
     this.scoreBreakdownEl.textContent = this.lines > 0
       ? `${baseScore} pontos × ${this.lines} linha${this.lines === 1 ? '' : 's'} = ${finalScore}`
-      : `${baseScore} pontos x 0 linhas completadas = 0`;
+      : `${baseScore} pontos (nenhuma linha completada)`;
     this.gameoverOverlay.classList.remove('hidden');
 
     this.leaderboardService.submit({

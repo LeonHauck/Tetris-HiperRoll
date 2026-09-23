@@ -61,10 +61,10 @@ sem frescura, sem instalar nada — abre e joga.
 
 | Tecla | Ação |
 |---|---|
-| `←` `→` | Mover |
-| `↑` ou `X` | Girar |
+| `←` `→` ou `A` `D` | Mover |
+| `↑`, `W` ou `X` | Girar |
 | `Z` | Girar (sentido contrário) |
-| `↓` | Descida suave |
+| `↓` ou `S` | Descida suave |
 | `Espaço` | Descida instantânea |
 | `C` | Guardar peça |
 | `P` | Pausar (e dá pra reiniciar ou ver o ranking sem sair) |
