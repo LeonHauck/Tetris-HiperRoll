@@ -98,6 +98,15 @@ ipcMain.handle('get-leaderboard', () => {
     .map(({ name, score }) => ({ name, score }));
 });
 
+// Diz se esse nome já foi usado por alguém nesse PC (em qualquer
+// pontuação salva, não só no Top 10) — pra evitar duas pessoas
+// diferentes aparecendo com o mesmo nome no ranking do evento.
+ipcMain.handle('check-name', (event, name) => {
+  const normalized = String(name || '').trim().toLowerCase();
+  if (!normalized) return false;
+  return loadAllScores().some(r => String(r.name || '').trim().toLowerCase() === normalized);
+});
+
 ipcMain.handle('save-score', (event, entry) => {
   const all = loadAllScores();
   const record = {

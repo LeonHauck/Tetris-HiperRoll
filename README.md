@@ -41,7 +41,9 @@ sem frescura, sem instalar nada — abre e joga.
 - **Nome na entrada**: pra jogar, a pessoa se identifica. No app desktop
   (evento) também se pede o telefone, pra usar depois num sorteio, numa
   campanha, no que fizer sentido pro time de marketing — no site, só o
-  nome mesmo.
+  nome mesmo. Se o nome já foi usado por outra pessoa no ranking, o jogo
+  pede pra escolher outro (tipo "João2"), sem letra maiúscula/minúscula
+  fazer diferença.
 - **Ranking com pódio**: Top 10 de quem mais pontuou, visível na tela
   inicial e no menu de pausa (com direito a reiniciar a partida sem sair
   do jogo), com medalha de ouro, prata e bronze pros 3 primeiros. O
@@ -159,6 +161,7 @@ Tetris-Hiperroll/
 │   ├── storage.php
 │   ├── leaderboard.php
 │   ├── score.php
+│   ├── check-name.php
 │   └── data/                       criado sozinho no servidor
 ├── electron/                      app desktop (.exe)
 │   ├── main.js

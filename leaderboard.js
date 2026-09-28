@@ -9,11 +9,18 @@
 //  - ElectronLeaderboardService -> arquivo local via Electron (app .exe, offline)
 //
 // Todas expõem a mesma interface:
-//   fetchTop()      -> Promise<Array<{name, score}>>
-//   submit(entry)   -> Promise<{ rank: number|null, list: Array }>
+//   fetchTop()          -> Promise<Array<{name, score}>>
+//   submit(entry)       -> Promise<{ rank: number|null, list: Array }>
+//   isNameTaken(name)   -> Promise<boolean>
 // "entry" é { name, phone, score }. O telefone nunca é exibido na tela,
 // só fica guardado para quem organiza o evento usar depois (ex: sorteio,
 // contato de marketing) — nunca aparece no ranking público.
+//
+// isNameTaken() evita que duas pessoas diferentes apareçam com o mesmo
+// nome no ranking (comparação sem diferenciar maiúscula/minúscula). Se a
+// verificação falhar (ex: sem internet), o jogo deixa jogar mesmo assim
+// — é melhor permitir um nome repetido ocasional do que travar alguém
+// de jogar por causa de rede.
 
 class LocalLeaderboardService {
   constructor() {
@@ -50,6 +57,13 @@ class LocalLeaderboardService {
     this._save(trimmed);
     const idx = trimmed.indexOf(record);
     return { rank: idx === -1 ? null : idx + 1, list: trimmed };
+  }
+
+  async isNameTaken(name) {
+    const normalized = String(name || '').trim().toLowerCase();
+    if (!normalized) return false;
+    // Modo local só guarda o Top 10 — é o melhor que dá pra checar aqui.
+    return this._load().some(r => String(r.name || '').trim().toLowerCase() === normalized);
   }
 }
 
@@ -88,6 +102,20 @@ class RemoteLeaderboardService {
       return this.fallback.submit(entry);
     }
   }
+
+  async isNameTaken(name) {
+    const normalized = String(name || '').trim();
+    if (!normalized) return false;
+    try {
+      const res = await fetch(`${this.baseUrl}/check-name.php?name=${encodeURIComponent(normalized)}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('resposta inválida do servidor');
+      const data = await res.json();
+      return !!data.taken;
+    } catch (e) {
+      // sem internet: não trava o jogador por causa disso
+      return false;
+    }
+  }
 }
 
 class ElectronLeaderboardService {
@@ -97,6 +125,10 @@ class ElectronLeaderboardService {
 
   async submit(entry) {
     return await window.electronAPI.saveScore(entry);
+  }
+
+  async isNameTaken(name) {
+    return await window.electronAPI.checkNameTaken(name);
   }
 }
 

@@ -20,7 +20,7 @@ $name = isset($input['name']) ? trim(mb_substr((string) $input['name'], 0, 40)) 
 $phone = isset($input['phone']) ? trim(mb_substr((string) $input['phone'], 0, 30)) : '';
 $score = isset($input['score']) ? (int) $input['score'] : -1;
 
-if ($name === '' || $score < 0 || $score > 10000000) {
+if ($name === '' || $score < 0 || $score > 1000000000) {
     http_response_code(400);
     echo json_encode(['error' => 'Dados inválidos']);
     exit;

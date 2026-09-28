@@ -806,11 +806,18 @@ function toggleMuteGlobal() {
 document.getElementById('mute-btn').addEventListener('click', toggleMuteGlobal);
 document.getElementById('mute-btn-start').addEventListener('click', toggleMuteGlobal);
 
-function tryStartGame() {
+let checkingName = false;
+
+async function tryStartGame() {
+  if (checkingName) return;
+
   const name = nameInput.value.trim();
   const phoneDigits = phoneInput.value.replace(/\D/g, '');
   const phoneMissing = isDesktopApp && phoneDigits.length < 8;
   if (!name || phoneMissing) {
+    nameError.textContent = isDesktopApp
+      ? 'Preencha nome e telefone para jogar!'
+      : 'Digite seu nome para jogar!';
     nameError.classList.remove('hidden');
     const invalidEl = !name ? nameInput : phoneInput;
     invalidEl.classList.add('input-error');
@@ -819,6 +826,34 @@ function tryStartGame() {
     return;
   }
   nameError.classList.add('hidden');
+
+  checkingName = true;
+  const startBtn = document.getElementById('start-btn');
+  const originalLabel = startBtn.textContent;
+  startBtn.disabled = true;
+  startBtn.textContent = 'Verificando nome...';
+
+  let taken = false;
+  try {
+    taken = await game.leaderboardService.isNameTaken(name);
+  } catch (e) {
+    taken = false; // se a verificação falhar, não trava quem quer jogar
+  }
+
+  startBtn.disabled = false;
+  startBtn.textContent = originalLabel;
+  checkingName = false;
+
+  if (taken) {
+    nameError.textContent = 'Esse nome já está em uso no ranking! Tente adicionar uma letra ou número, tipo "' + name + '2".';
+    nameError.classList.remove('hidden');
+    nameInput.classList.add('input-error');
+    nameInput.focus();
+    nameInput.select();
+    setTimeout(() => nameInput.classList.remove('input-error'), 300);
+    return;
+  }
+
   localStorage.setItem('hipertris_playername', name);
   if (isDesktopApp) localStorage.setItem('hipertris_playerphone', phoneInput.value);
 
