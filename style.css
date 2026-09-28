@@ -286,7 +286,7 @@ html, body {
   aspect-ratio: 1 / 2;
   margin: 0 auto;
 }
-@media (min-width: 721px) {
+@media (min-width: 901px) {
   .board-wrap { width: min(46vw, 420px, 42vh); }
 }
 
@@ -366,21 +366,50 @@ html, body {
 }
 .mc-btn:active { background: var(--hr-red); }
 
-@media (max-width: 720px) {
-  .mobile-controls { display: flex; }
+/* Botões de toque: aparecem em QUALQUER aparelho com tela sensível ao
+   toque (celular ou tablet, independente da largura — muito tablet é
+   mais largo que 720px e mesmo assim não tem teclado físico). A
+   detecção de toque de verdade é feita em JS, que adiciona esta classe
+   no <body>. Ficam fixos no rodapé, sempre alcançáveis sem rolar a tela. */
+body.touch-device .mobile-controls {
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  margin-top: 0;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(8, 11, 30, 0.97);
+  border-top: 1px solid var(--panel-border);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+}
+/* Espaço reservado no fim da tela pra nada ficar escondido atrás da
+   barra de controles fixa. */
+body.touch-device #game-screen { padding-bottom: 96px; }
+
+/* Layout compacto (empilhado): tela estreita OU tablet em pé — nos dois
+   casos o tabuleiro precisa ficar mais baixo pra sobrar espaço de
+   verdade pros painéis e pros controles. */
+@media (max-width: 900px) {
+  .board-wrap { width: min(78vw, 320px, 30vh); }
+
   .side-panel.left { order: 1; }
   .board-wrap { order: 0; }
   .side-panel.right { order: 2; }
   .game-layout { flex-direction: column; align-items: center; }
-  .side-panel { flex-direction: row; width: auto; flex-wrap: wrap; justify-content: center; }
-  .panel-box { width: 100px; }
+  .side-panel { flex-direction: row; width: auto; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .panel-box { width: 96px; padding: 8px; }
+  .panel-box h3 { font-size: 0.68em; margin-bottom: 4px; }
+  .stats .stat-value { font-size: 1.15em; margin-bottom: 6px; }
   .screen { padding: 10px; }
-  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .topbar { flex-wrap: wrap; row-gap: 6px; margin-bottom: 8px; }
 }
 
 @media (max-width: 380px) {
-  .panel-box { width: 84px; padding: 6px; }
-  .mc-btn { padding: 12px 14px; font-size: 1em; }
+  .board-wrap { width: min(74vw, 300px, 28vh); }
+  .panel-box { width: 82px; padding: 6px; }
+  .mc-btn { padding: 10px 12px; font-size: 0.95em; min-width: 42px; }
 }
 
 @media (max-width: 480px) {

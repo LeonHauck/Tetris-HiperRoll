@@ -747,6 +747,14 @@ function showScreen(id) {
   document.getElementById(id).classList.remove('hidden');
 }
 
+// Mostra os botões de toque em qualquer aparelho com tela sensível ao toque
+// (celular ou tablet, de qualquer tamanho) — não dá pra confiar só na
+// largura da tela, porque muitos tablets são mais largos que 720px e
+// mesmo assim não têm teclado físico.
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  document.body.classList.add('touch-device');
+}
+
 const game = new Game();
 
 // O campo de telefone só existe no app desktop (Electron) — no site/navegador
