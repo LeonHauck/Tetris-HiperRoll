@@ -22,6 +22,21 @@
 // — é melhor permitir um nome repetido ocasional do que travar alguém
 // de jogar por causa de rede.
 
+// O ranking mostra só a melhor pontuação de cada nome — senão quem joga
+// várias vezes (ex: "Jogar novamente") lota o Top 10 com o próprio nome
+// repetido. Mantém a mesma referência de objeto de quem vence, pra dar
+// pra achar a posição depois com indexOf().
+function bestPerName(list) {
+  const best = new Map();
+  for (const r of list) {
+    const key = String(r.name || '').trim().toLowerCase();
+    if (!key) continue;
+    const current = best.get(key);
+    if (!current || r.score > current.score) best.set(key, r);
+  }
+  return Array.from(best.values());
+}
+
 class LocalLeaderboardService {
   constructor() {
     this.key = 'hipertris_leaderboard';
@@ -52,8 +67,8 @@ class LocalLeaderboardService {
       date: new Date().toISOString()
     };
     list.push(record);
-    list.sort((a, b) => b.score - a.score);
-    const trimmed = list.slice(0, 10);
+    const ranked = bestPerName(list).sort((a, b) => b.score - a.score);
+    const trimmed = ranked.slice(0, 10);
     this._save(trimmed);
     const idx = trimmed.indexOf(record);
     return { rank: idx === -1 ? null : idx + 1, list: trimmed };

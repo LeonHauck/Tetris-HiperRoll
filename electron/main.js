@@ -42,6 +42,22 @@ function saveAllScores(list) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(list, null, 2), 'utf-8');
 }
 
+// O arquivo guarda TODAS as partidas jogadas (histórico completo, útil
+// pros dados de contato do evento), mas o RANKING mostra só a melhor
+// pontuação de cada pessoa — senão quem joga várias vezes lota o Top 10
+// com o próprio nome repetido. Mantém a mesma referência de objeto de
+// quem vence, pra dar pra achar a posição depois com indexOf().
+function bestPerName(list) {
+  const best = new Map();
+  for (const r of list) {
+    const key = String(r.name || '').trim().toLowerCase();
+    if (!key) continue;
+    const current = best.get(key);
+    if (!current || r.score > current.score) best.set(key, r);
+  }
+  return Array.from(best.values());
+}
+
 function escapeCsv(v) {
   return `"${String(v).replace(/"/g, '""')}"`;
 }
@@ -91,8 +107,7 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('get-leaderboard', () => {
   const all = loadAllScores();
-  return all
-    .slice()
+  return bestPerName(all)
     .sort((a, b) => b.score - a.score)
     .slice(0, 10)
     .map(({ name, score }) => ({ name, score }));
@@ -119,7 +134,10 @@ ipcMain.handle('save-score', (event, entry) => {
   saveAllScores(all);
   writeCsv(all);
 
-  const ranked = all.slice().sort((a, b) => b.score - a.score);
+  // Só informa posição se essa partida for o recorde pessoal atual de
+  // quem jogou (senão a pessoa já está ranqueada pela tentativa
+  // anterior, mais alta, e essa aqui não muda nada).
+  const ranked = bestPerName(all).sort((a, b) => b.score - a.score);
   const rankIdx = ranked.indexOf(record);
   const rank = rankIdx !== -1 && rankIdx < 10 ? rankIdx + 1 : null;
   const list = ranked.slice(0, 10).map(({ name, score }) => ({ name, score }));

@@ -46,9 +46,11 @@ sem frescura, sem instalar nada — abre e joga.
   automaticamente, sem letra maiúscula/minúscula fazer diferença.
 - **Ranking com pódio**: Top 10 de quem mais pontuou, visível na tela
   inicial e no menu de pausa (com direito a reiniciar a partida sem sair
-  do jogo), com medalha de ouro, prata e bronze pros 3 primeiros. O
-  telefone (quando coletado) nunca aparece na tela — fica só guardado
-  por trás.
+  do jogo), com medalha de ouro, prata e bronze pros 3 primeiros. Mostra
+  só a melhor pontuação de cada pessoa — jogar de novo não lota o
+  ranking com o próprio nome repetido, mas todas as partidas continuam
+  registradas nos dados do evento. O telefone (quando coletado) nunca
+  aparece na tela — fica só guardado por trás.
 - **Funciona em três formatos**, mesmo código por trás dos três:
   1. Arquivo estático (abre o `index.html` e já era) — ranking só no
      navegador de quem jogou.

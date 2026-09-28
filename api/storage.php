@@ -72,3 +72,19 @@ function hipertris_public(array $records) {
         return ['name' => $r['name'], 'score' => $r['score']];
     }, $records);
 }
+
+// O arquivo guarda TODAS as partidas jogadas (histórico completo, útil
+// pros dados de contato do evento), mas o RANKING deve mostrar só a
+// melhor pontuação de cada pessoa — senão quem joga várias vezes lota
+// o Top 10 com o próprio nome repetido.
+function hipertris_best_per_name(array $records) {
+    $best = [];
+    foreach ($records as $r) {
+        $key = mb_strtolower(trim($r['name']));
+        if ($key === '') continue;
+        if (!isset($best[$key]) || $r['score'] > $best[$key]['score']) {
+            $best[$key] = $r;
+        }
+    }
+    return array_values($best);
+}
