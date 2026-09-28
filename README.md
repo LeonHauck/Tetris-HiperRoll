@@ -42,8 +42,8 @@ sem frescura, sem instalar nada — abre e joga.
   (evento) também se pede o telefone, pra usar depois num sorteio, numa
   campanha, no que fizer sentido pro time de marketing — no site, só o
   nome mesmo. Se o nome já foi usado por outra pessoa no ranking, o jogo
-  pede pra escolher outro (tipo "João2"), sem letra maiúscula/minúscula
-  fazer diferença.
+  resolve sozinho, sem perguntar nada: o segundo "João" vira "João (2)"
+  automaticamente, sem letra maiúscula/minúscula fazer diferença.
 - **Ranking com pódio**: Top 10 de quem mais pontuou, visível na tela
   inicial e no menu de pausa (com direito a reiniciar a partida sem sair
   do jogo), com medalha de ouro, prata e bronze pros 3 primeiros. O

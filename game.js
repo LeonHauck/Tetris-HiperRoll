@@ -808,6 +808,24 @@ document.getElementById('mute-btn-start').addEventListener('click', toggleMuteGl
 
 let checkingName = false;
 
+// Se o nome já estiver em uso por outra pessoa no ranking, acrescenta
+// "(2)", "(3)" etc. sozinho, sem perguntar nada — ninguém fica travado
+// esperando decidir um nome novo.
+async function resolveUniqueName(name) {
+  let candidate = name;
+  for (let suffix = 2; suffix <= 50; suffix++) {
+    let taken = false;
+    try {
+      taken = await game.leaderboardService.isNameTaken(candidate);
+    } catch (e) {
+      return candidate; // verificação falhou: não trava quem quer jogar
+    }
+    if (!taken) return candidate;
+    candidate = `${name} (${suffix})`;
+  }
+  return `${name} (${Date.now().toString().slice(-4)})`;
+}
+
 async function tryStartGame() {
   if (checkingName) return;
 
@@ -833,34 +851,19 @@ async function tryStartGame() {
   startBtn.disabled = true;
   startBtn.textContent = 'Verificando nome...';
 
-  let taken = false;
-  try {
-    taken = await game.leaderboardService.isNameTaken(name);
-  } catch (e) {
-    taken = false; // se a verificação falhar, não trava quem quer jogar
-  }
+  const finalName = await resolveUniqueName(name);
 
   startBtn.disabled = false;
   startBtn.textContent = originalLabel;
   checkingName = false;
 
-  if (taken) {
-    nameError.textContent = 'Esse nome já está em uso no ranking! Tente adicionar uma letra ou número, tipo "' + name + '2".';
-    nameError.classList.remove('hidden');
-    nameInput.classList.add('input-error');
-    nameInput.focus();
-    nameInput.select();
-    setTimeout(() => nameInput.classList.remove('input-error'), 300);
-    return;
-  }
-
-  localStorage.setItem('hipertris_playername', name);
+  localStorage.setItem('hipertris_playername', finalName);
   if (isDesktopApp) localStorage.setItem('hipertris_playerphone', phoneInput.value);
 
   showScreen('game-screen');
-  game.playerName = name;
+  game.playerName = finalName;
   game.playerPhone = isDesktopApp ? phoneInput.value : '';
-  document.getElementById('player-name-display').textContent = `Jogador: ${name}`;
+  document.getElementById('player-name-display').textContent = `Jogador: ${finalName}`;
   game.start();
 }
 
